@@ -1,17 +1,18 @@
-import pytest
-
-# from glob import glob
 import yaml
 
+import pytest
+
 path_to_data = "test/data/"
-# path_to_data = 'data/'
 
 
 # TODO: this fixture is no longer used, move it's data into sir_records.yml
 @pytest.fixture
 def slotfiles():
-    # slotfiles_files = glob(path_to_data + 'slots_*.yml')
-    slotfiles_files = ["slots_austria.yml", "slots_belgium.yml", "slots_netherlands.yml"]
+    slotfiles_files = [
+        "slots_austria.yml",
+        "slots_belgium.yml",
+        "slots_netherlands.yml",
+    ]
     slotfile_list = []
     for slotfile in slotfiles_files:
         with open(path_to_data + slotfile) as f:
