@@ -3,15 +3,22 @@ import ssim
 import argparse
 
 parser = argparse.ArgumentParser(description="Converts a slotfile to CSV.")
-parser.add_argument("-i", help="Input slotfile filename", type=str, metavar="input filename", required=True)
-parser.add_argument("-o", help="Output csv filename", type=str, metavar="output filename", required=True)
+parser.add_argument(
+    "-i",
+    help="Input slotfile filename",
+    type=str,
+    metavar="input filename",
+    required=True,
+)
+parser.add_argument(
+    "-o", help="Output csv filename", type=str, metavar="output filename", required=True
+)
 args = parser.parse_args()
 input_file = args.i
 output_file = args.o
 
 
 def main():
-
     records = ssim.read(input_file)
     flights = ssim.expand_slots(records)
 

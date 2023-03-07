@@ -1,6 +1,6 @@
-from ssim.ssim import _expand
+from ssim import ssim
 
 
 def test_expand_slot(expanding_slots):
     for slot in expanding_slots:
-        assert _expand(slot["slot"]) == slot["flights"]
+        assert ssim._expand(slot["slot"]) == slot["flights"]

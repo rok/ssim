@@ -1,4 +1,5 @@
-# TODO: create AD indicator, multiple flights out of turnaround flights, arrival / departure / both to rows transformation
+# TODO: create AD indicator, multiple flights out of turnaround flights,
+#  arrival / departure / both to rows transformation
 # TODO: port aircraft and seat configuration parsing for sim
 # TODO: testing of expanding
 # TODO: fix bad midnight
@@ -14,7 +15,9 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 from regexes import regexes
 
-logging.basicConfig(format="[%(asctime)s] %(levelname)s: %(message)s", level=logging.DEBUG)
+logging.basicConfig(
+    format="[%(asctime)s] %(levelname)s: %(message)s", level=logging.DEBUG
+)
 
 year_adjustment = {
     "S": {
@@ -47,7 +50,8 @@ year_adjustment = {
     },
 }
 
-infinity_indicators = ["00XXX00"]  # indicates that something should run until start/end of season
+# indicates that something should run until start/end of season
+infinity_indicators = ["00XXX00"]
 
 
 def find_season_dates(season):
@@ -57,7 +61,7 @@ def find_season_dates(season):
 
     Parameters
     ----------.
-    season: string, indicating IATA season  (W17, S23). Note that W17 starts 
+    season: string, indicating IATA season  (W17, S23). Note that W17 starts
     in October 2016
 
     Returns
@@ -100,8 +104,8 @@ def find_season_dates(season):
     return season_dates[0], season_dates[-1]
 
 
-def _flatten(l):
-    return [item for sublist in l for item in sublist]
+def _flatten(lst):
+    return [item for sublist in lst for item in sublist]
 
 
 def _merge_two_dicts(x, y):
@@ -134,7 +138,7 @@ def _expand(record, date_format="%d%b%y", season=None):
     """
 
     if "days_of_operation" in record and record["days_of_operation"] is not None:
-        days_of_operation = re.sub("\s|0", "", record["days_of_operation"])
+        days_of_operation = re.sub(r"\s|0", "", record["days_of_operation"])
         days_of_operation = [int(weekday) - 1 for weekday in days_of_operation]
     else:
         days_of_operation = range(0, 7)
@@ -157,11 +161,13 @@ def _expand(record, date_format="%d%b%y", season=None):
             raise ValueError(
                 "Found infinity indicator "
                 + period_of_operation_from
-                + " in file, but no season specified. Pleas sepcify season. \n"
+                + " in file, but no season specified. Pleas specify season. \n"
                 + record["raw"]
             )
     else:
-        period_of_operation_from = datetime.strptime(period_of_operation_from, date_format)
+        period_of_operation_from = datetime.strptime(
+            period_of_operation_from, date_format
+        )
 
     period_of_operation_to = record["period_of_operation_to"]
     if period_of_operation_to in infinity_indicators:
@@ -171,7 +177,7 @@ def _expand(record, date_format="%d%b%y", season=None):
             raise ValueError(
                 "Found infinity indicator "
                 + period_of_operation_to
-                + " in file, but no season specified. Pleas sepcify season. \n"
+                + " in file, but no season specified. Pleas specify season. \n"
                 + record["raw"]
             )
     else:
@@ -191,7 +197,9 @@ def _expand(record, date_format="%d%b%y", season=None):
     else:
         td = timedelta(days=0)
 
-    records = [_merge_two_dicts(record, {"date": (x + td).strftime("%Y-%m-%d")}) for x in dates]
+    records = [
+        _merge_two_dicts(record, {"date": (x + td).strftime("%Y-%m-%d")}) for x in dates
+    ]
 
     return records
 
@@ -222,19 +230,47 @@ def _parse_sim(text):
 
     if record_2["time_mode"] == "U":
         [
-            x.update({"scheduled_time_of_aircraft_arrival": x["scheduled_time_of_aircraft_arrival"] + "+0000"})
+            x.update(
+                {
+                    "scheduled_time_of_aircraft_arrival": x[
+                        "scheduled_time_of_aircraft_arrival"
+                    ]
+                    + "+0000"
+                }
+            )
             for x in flight_leg_records
         ]
         [
-            x.update({"scheduled_time_of_passenger_arrival": x["scheduled_time_of_passenger_arrival"] + "+0000"})
+            x.update(
+                {
+                    "scheduled_time_of_passenger_arrival": x[
+                        "scheduled_time_of_passenger_arrival"
+                    ]
+                    + "+0000"
+                }
+            )
             for x in flight_leg_records
         ]
         [
-            x.update({"scheduled_time_of_aircraft_departure": x["scheduled_time_of_aircraft_departure"] + "+0000"})
+            x.update(
+                {
+                    "scheduled_time_of_aircraft_departure": x[
+                        "scheduled_time_of_aircraft_departure"
+                    ]
+                    + "+0000"
+                }
+            )
             for x in flight_leg_records
         ]
         [
-            x.update({"scheduled_time_of_passenger_departure": x["scheduled_time_of_passenger_departure"] + "+0000"})
+            x.update(
+                {
+                    "scheduled_time_of_passenger_departure": x[
+                        "scheduled_time_of_passenger_departure"
+                    ]
+                    + "+0000"
+                }
+            )
             for x in flight_leg_records
         ]
 
@@ -242,7 +278,9 @@ def _parse_sim(text):
         [
             x.update(
                 {
-                    "scheduled_time_of_aircraft_arrival": x["scheduled_time_of_aircraft_arrival"]
+                    "scheduled_time_of_aircraft_arrival": x[
+                        "scheduled_time_of_aircraft_arrival"
+                    ]
                     + x["utc_local_time_variation_arrival"]
                 }
             )
@@ -251,7 +289,9 @@ def _parse_sim(text):
         [
             x.update(
                 {
-                    "scheduled_time_of_passenger_arrival": x["scheduled_time_of_passenger_arrival"]
+                    "scheduled_time_of_passenger_arrival": x[
+                        "scheduled_time_of_passenger_arrival"
+                    ]
                     + x["utc_local_time_variation_arrival"]
                 }
             )
@@ -260,7 +300,9 @@ def _parse_sim(text):
         [
             x.update(
                 {
-                    "scheduled_time_of_aircraft_departure": x["scheduled_time_of_aircraft_departure"]
+                    "scheduled_time_of_aircraft_departure": x[
+                        "scheduled_time_of_aircraft_departure"
+                    ]
                     + x["utc_local_time_variation_departure"]
                 }
             )
@@ -269,7 +311,9 @@ def _parse_sim(text):
         [
             x.update(
                 {
-                    "scheduled_time_of_passenger_departure": x["scheduled_time_of_passenger_departure"]
+                    "scheduled_time_of_passenger_departure": x[
+                        "scheduled_time_of_passenger_departure"
+                    ]
                     + x["utc_local_time_variation_departure"]
                 }
             )
@@ -281,7 +325,13 @@ def _parse_sim(text):
     return flight_leg_records
 
 
-def _attach_year_sir(record, year, season, from_key="period_of_operation_from", to_key="period_of_operation_to"):
+def _attach_year_sir(
+    record,
+    year,
+    season,
+    from_key="period_of_operation_from",
+    to_key="period_of_operation_to",
+):
     """
     This function adds year to dates from SIR message records.
     It also adjusts year - e.g. if the record is dated 2nd February in Winter 17 season the actual date
@@ -302,7 +352,9 @@ def _attach_year_sir(record, year, season, from_key="period_of_operation_from", 
 
     from_month = record[from_key][2:]
     to_month = record[to_key][2:]
-    record[from_key] = record[from_key] + str(year + year_adjustment[season][from_month])
+    record[from_key] = record[from_key] + str(
+        year + year_adjustment[season][from_month]
+    )
     record[to_key] = record[to_key] + str(year + year_adjustment[season][to_month])
 
     return record
@@ -347,19 +399,30 @@ def _uniformize_sim_as_sir(slot, iata_airport):
     :param iata_airport: str, three letters, indicating name of airport.
     :return row: dict, describing aircraft configuration.
     """
-    assert type(iata_airport) is str, "iata_airport is not an integer: %r" % iata_airport
-    assert len(iata_airport) == 3, "iata_airport is not exactly three characters: %r" % iata_airport
-    assert iata_airport.upper() == iata_airport, "iata_airport is all capital letters: %r" % iata_airport
+    assert type(iata_airport) is str, (
+        "iata_airport is not an integer: %r" % iata_airport
+    )
+    assert len(iata_airport) == 3, (
+        "iata_airport is not exactly three characters: %r" % iata_airport
+    )
+    assert iata_airport.upper() == iata_airport, (
+        "iata_airport is all capital letters: %r" % iata_airport
+    )
     uniform_slots = []
 
     # it's very hard to see if a flight is overnight. In case time of dep is
     # higher than time of arr, it is likely to arrive overnight
     overnight_indicator_arrival = False
     if slot["arrival_station"] and slot["departure_station"]:
-        if slot["scheduled_time_of_aircraft_arrival"] < slot["scheduled_time_of_aircraft_departure"]:
+        if (
+            slot["scheduled_time_of_aircraft_arrival"]
+            < slot["scheduled_time_of_aircraft_departure"]
+        ):
             overnight_indicator_arrival = True
 
-    seats = _explode_aircraft_configuration_string(slot["aircraft_configuration_version"], slot["raw"])
+    seats = _explode_aircraft_configuration_string(
+        slot["aircraft_configuration_version"], slot["raw"]
+    )
     if slot["arrival_station"] == iata_airport:
         uniform_slots.append(
             {
@@ -419,7 +482,9 @@ def _uniformize_sir(slot):
             {
                 "ad": "A",
                 "action_code": slot["action_code"],
-                "additional_schedule_information": slot["additional_schedule_information"],
+                "additional_schedule_information": slot[
+                    "additional_schedule_information"
+                ],
                 "aircraft_type": slot["aircraft_type"],
                 "airline_designator": slot["arrival_airline_designator"],
                 "flight_number": slot["arrival_flight_number"],
@@ -427,7 +492,9 @@ def _uniformize_sir(slot):
                 "service_type": slot["arrival_service_type"],
                 "days_of_operation": slot["days_of_operation"],
                 "frequency_rate": slot["frequency_rate"],
-                "seats": int(slot["seats"]) if slot["seats"].isdigit() else slot["seats"],
+                "seats": int(slot["seats"])
+                if slot["seats"].isdigit()
+                else slot["seats"],
                 "second_station": slot["origin_station"],
                 "period_of_operation_from": slot["period_of_operation_from"],
                 "period_of_operation_to": slot["period_of_operation_to"],
@@ -442,7 +509,9 @@ def _uniformize_sir(slot):
             {
                 "ad": "D",
                 "action_code": slot["action_code"],
-                "additional_schedule_information": slot["additional_schedule_information"],
+                "additional_schedule_information": slot[
+                    "additional_schedule_information"
+                ],
                 "aircraft_type": slot["aircraft_type"],
                 "days_of_operation": slot["days_of_operation"],
                 "airline_designator": slot["departure_airline_designator"],
@@ -452,7 +521,9 @@ def _uniformize_sir(slot):
                 "second_station": slot["destination_station"],
                 "frequency_rate": slot["frequency_rate"],
                 "station": slot["next_station"],
-                "seats": int(slot["seats"]) if slot["seats"].isdigit() else slot["seats"],
+                "seats": int(slot["seats"])
+                if slot["seats"].isdigit()
+                else slot["seats"],
                 "period_of_operation_from": slot["period_of_operation_from"],
                 "period_of_operation_to": slot["period_of_operation_to"],
                 "raw": slot["raw"],
@@ -483,26 +554,46 @@ def _uniformize_sim(s):
                 "days_of_operation": s["days_of_operation"],
                 "frequency_rate": s["frequency_rate"],
                 "departure_station": s["departure_station"],
-                "scheduled_time_of_passenger_departure": s["scheduled_time_of_passenger_departure"],
-                "scheduled_time_of_aircraft_departure": s["scheduled_time_of_aircraft_departure"],
-                "utc_local_time_variation_departure": s["utc_local_time_variation_departure"],
+                "scheduled_time_of_passenger_departure": s[
+                    "scheduled_time_of_passenger_departure"
+                ],
+                "scheduled_time_of_aircraft_departure": s[
+                    "scheduled_time_of_aircraft_departure"
+                ],
+                "utc_local_time_variation_departure": s[
+                    "utc_local_time_variation_departure"
+                ],
                 "passenger_terminal_departure": s["passenger_terminal_departure"],
                 "arrival_station": s["arrival_station"],
-                "scheduled_time_of_aircraft_arrival": s["scheduled_time_of_aircraft_arrival"],
-                "scheduled_time_of_passenger_arrival": s["scheduled_time_of_passenger_arrival"],
-                "utc_local_time_variation_arrival": s["utc_local_time_variation_arrival"],
+                "scheduled_time_of_aircraft_arrival": s[
+                    "scheduled_time_of_aircraft_arrival"
+                ],
+                "scheduled_time_of_passenger_arrival": s[
+                    "scheduled_time_of_passenger_arrival"
+                ],
+                "utc_local_time_variation_arrival": s[
+                    "utc_local_time_variation_arrival"
+                ],
                 "passenger_terminal_arrival": s["passenger_terminal_arrival"],
                 "aircraft_type": s["aircraft_type"],
-                "passenger_reservations_booking_designator": s["passenger_reservations_booking_designator"],
-                "passenger_reservations_booking_modifier": s["passenger_reservations_booking_modifier"],
+                "passenger_reservations_booking_designator": s[
+                    "passenger_reservations_booking_designator"
+                ],
+                "passenger_reservations_booking_modifier": s[
+                    "passenger_reservations_booking_modifier"
+                ],
                 "meal_service_note": s["meal_service_note"],
-                "joint_operation_airline_designators": s["joint_operation_airline_designators"],
+                "joint_operation_airline_designators": s[
+                    "joint_operation_airline_designators"
+                ],
                 "minimum_connecting_time_international_domestic_status": s[
                     "minimum_connecting_time_international_domestic_status"
                 ],
                 "secure_flight_indicator": s["secure_flight_indicator"],
                 "spare_0": s["spare_0"],
-                "itinerary_variation_identifier_overflow": s["itinerary_variation_identifier_overflow"],
+                "itinerary_variation_identifier_overflow": s[
+                    "itinerary_variation_identifier_overflow"
+                ],
                 "aircraft_owner": s["aircraft_owner"],
                 "cockpit_crew_employer": s["cockpit_crew_employer"],
                 "cabin_crew_employer": s["cabin_crew_employer"],
@@ -514,7 +605,9 @@ def _uniformize_sim(s):
                 "flight_transit_layover": s["flight_transit_layover"],
                 "operating_airline_disclosure": s["operating_airline_disclosure"],
                 "traffic_restriction_code": s["traffic_restriction_code"],
-                "traffic_restriction_code_leg_overflow_indicator": s["traffic_restriction_code_leg_overflow_indicator"],
+                "traffic_restriction_code_leg_overflow_indicator": s[
+                    "traffic_restriction_code_leg_overflow_indicator"
+                ],
                 "spare_2": s["spare_2"],
                 "aircraft_configuration_version": s["aircraft_configuration_version"],
                 "date_variation": s["date_variation"],
@@ -539,26 +632,46 @@ def _uniformize_sim(s):
                 "days_of_operation": s["days_of_operation"],
                 "frequency_rate": s["frequency_rate"],
                 "departure_station": s["departure_station"],
-                "scheduled_time_of_passenger_departure": s["scheduled_time_of_passenger_departure"],
-                "scheduled_time_of_aircraft_departure": s["scheduled_time_of_aircraft_departure"],
-                "utc_local_time_variation_departure": s["utc_local_time_variation_departure"],
+                "scheduled_time_of_passenger_departure": s[
+                    "scheduled_time_of_passenger_departure"
+                ],
+                "scheduled_time_of_aircraft_departure": s[
+                    "scheduled_time_of_aircraft_departure"
+                ],
+                "utc_local_time_variation_departure": s[
+                    "utc_local_time_variation_departure"
+                ],
                 "passenger_terminal_departure": s["passenger_terminal_departure"],
                 "arrival_station": s["arrival_station"],
-                "scheduled_time_of_aircraft_arrival": s["scheduled_time_of_aircraft_arrival"],
-                "scheduled_time_of_passenger_arrival": s["scheduled_time_of_passenger_arrival"],
-                "utc_local_time_variation_arrival": s["utc_local_time_variation_arrival"],
+                "scheduled_time_of_aircraft_arrival": s[
+                    "scheduled_time_of_aircraft_arrival"
+                ],
+                "scheduled_time_of_passenger_arrival": s[
+                    "scheduled_time_of_passenger_arrival"
+                ],
+                "utc_local_time_variation_arrival": s[
+                    "utc_local_time_variation_arrival"
+                ],
                 "passenger_terminal_arrival": s["passenger_terminal_arrival"],
                 "aircraft_type": s["aircraft_type"],
-                "passenger_reservations_booking_designator": s["passenger_reservations_booking_designator"],
-                "passenger_reservations_booking_modifier": s["passenger_reservations_booking_modifier"],
+                "passenger_reservations_booking_designator": s[
+                    "passenger_reservations_booking_designator"
+                ],
+                "passenger_reservations_booking_modifier": s[
+                    "passenger_reservations_booking_modifier"
+                ],
                 "meal_service_note": s["meal_service_note"],
-                "joint_operation_airline_designators": s["joint_operation_airline_designators"],
+                "joint_operation_airline_designators": s[
+                    "joint_operation_airline_designators"
+                ],
                 "minimum_connecting_time_international_domestic_status": s[
                     "minimum_connecting_time_international_domestic_status"
                 ],
                 "secure_flight_indicator": s["secure_flight_indicator"],
                 "spare_0": s["spare_0"],
-                "itinerary_variation_identifier_overflow": s["itinerary_variation_identifier_overflow"],
+                "itinerary_variation_identifier_overflow": s[
+                    "itinerary_variation_identifier_overflow"
+                ],
                 "aircraft_owner": s["aircraft_owner"],
                 "cockpit_crew_employer": s["cockpit_crew_employer"],
                 "cabin_crew_employer": s["cabin_crew_employer"],
@@ -570,7 +683,9 @@ def _uniformize_sim(s):
                 "flight_transit_layover": s["flight_transit_layover"],
                 "operating_airline_disclosure": s["operating_airline_disclosure"],
                 "traffic_restriction_code": s["traffic_restriction_code"],
-                "traffic_restriction_code_leg_overflow_indicator": s["traffic_restriction_code_leg_overflow_indicator"],
+                "traffic_restriction_code_leg_overflow_indicator": s[
+                    "traffic_restriction_code_leg_overflow_indicator"
+                ],
                 "spare_2": s["spare_2"],
                 "aircraft_configuration_version": s["aircraft_configuration_version"],
                 "date_variation": s["date_variation"],
@@ -579,7 +694,9 @@ def _uniformize_sim(s):
         )
 
     for i in range(0, len(uniform_slots)):
-        seats = _explode_aircraft_configuration_string(uniform_slots[i]["aircraft_configuration_version"], s["raw"])
+        seats = _explode_aircraft_configuration_string(
+            uniform_slots[i]["aircraft_configuration_version"], s["raw"]
+        )
         # uniform_slots[i] = {**seats,**uniform_slots[i]}
         uniform_slots[i] = _merge_two_dicts(seats, uniform_slots[i])
 
@@ -594,7 +711,7 @@ def read(file, iata_airport=None):
     ----------.
     file : path to a slotfile.
     airport_iata: 3 letter capital string indicating iata airport. If passed
-    along with SIM file, it will return data from perspective of airport (as 
+    along with SIM file, it will return data from perspective of airport (as
     SIR)
 
     Returns
@@ -635,7 +752,7 @@ def expand_slots(slots, season=None):
     Parameters
     ----------.
     :param slots: list, a list of slot dicts.
-    :param season: indication of season to import. SSIM files can contain 
+    :param season: indication of season to import. SSIM files can contain
     00XXX00 as date indicators, which means from beginning/until end of season.
     Argument is required and only used when file contains 00XXX00.
 
@@ -647,7 +764,9 @@ def expand_slots(slots, season=None):
     flights = [_expand(slot, season=season) for slot in slots]
     flattened_flights = _flatten(flights)
 
-    logging.info("Expanded %i slots into %i flights." % (len(slots), len(flattened_flights)))
+    logging.info(
+        "Expanded %i slots into %i flights." % (len(slots), len(flattened_flights))
+    )
     return flattened_flights
 
 
@@ -658,12 +777,12 @@ def _explode_aircraft_configuration_string(aircraft_configuration_string, raw_li
 
     Parameters
     ----------.
-    :param aircraft_configuration_string: str, describing aircraft configuartion.
-    :param raw_line: str, optinal for displaying original slot line in case of error
+    :param aircraft_configuration_string: str, describing aircraft configuration.
+    :param raw_line: str, optional for displaying original slot line in case of error
     :return row: dict, describing aircraft configuration.
     """
 
-    # if none retunr empty dict
+    # if none return empty dict
     if aircraft_configuration_string is None:
         return {}
 
@@ -711,20 +830,25 @@ def _explode_aircraft_configuration_string(aircraft_configuration_string, raw_li
     # seat designator should be in fixed order according to standard
     for designator_type, designators in integer_designators.items():
         for designator in designators:
-            if string_remainder.startswith(designator) and (  # only continue if string starts with designator and...
+            if string_remainder.startswith(
+                designator
+            ) and (  # only continue if string starts with designator and...
                 len(designator) > 1
                 or not (  # either have a multi length designator
-                    (len(string_remainder) > 1 and string_remainder[1] == string_remainder[0])
+                    (
+                        len(string_remainder) > 1
+                        and string_remainder[1] == string_remainder[0]
+                    )
                     or string_remainder.startswith("V V")
                 )
             ):  #
-
                 acv_info_key = designator_type + "_" + designator
 
                 # for next iteration, remove designator from beginning of string
-                string_remainder = string_remainder[len(designator):]
+                string_remainder = string_remainder[len(designator) :]
 
-                # standard specifies that there may be an int following. If not return empty string (to later on destinguish from NaN if data gets put in a data frame)
+                # standard specifies that there may be an int following. If not return empty string (to later on
+                # distinguish from NaN if data gets put in a data frame)
                 acv_info_val = ""
                 acv_regex = re.search(r"^\d*", string_remainder).group()
 
@@ -737,24 +861,26 @@ def _explode_aircraft_configuration_string(aircraft_configuration_string, raw_li
                         else:
                             acv_info[designator_type] = acv_info_val
 
-                    string_remainder = string_remainder[len(acv_regex):]
+                    string_remainder = string_remainder[len(acv_regex) :]
 
                 # store found information
                 acv_info[acv_info_key] = acv_info_val
 
-    # remainer are general designators
+    # remained are general designators
     if string_remainder.startswith("BB"):
         acv_info["BB"] = ""
 
     # aircraft type
     if string_remainder.startswith("VV"):
         acv_info["VV"] = string_remainder[2:]
-    elif string_remainder.startswith("V V"):  # aircraft type alt. Assuming it won't appear together with VV.
+    elif string_remainder.startswith(
+        "V V"
+    ):  # aircraft type alt. Assuming it won't appear together with VV.
         acv_info["V V"] = string_remainder[3:]
     elif len(string_remainder.strip()):
         log_text = (
-            "After trying to process aircraft configuration string, there should be no remainder. However, the following string remains in this instance: (%s)"
-            % string_remainder
+            "After trying to process aircraft configuration string, there should be no remainder. However, "
+            "the following string remains in this instance: (%s)" % string_remainder
         )
         if raw_line:
             log_text += "\n Raw slot line: " + raw_line
